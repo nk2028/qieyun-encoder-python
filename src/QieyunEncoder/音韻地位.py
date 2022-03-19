@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-定義切韻音系音韻地位及相關操作。
+切韻音系音韻地位及相關操作。
 
 ## 音韻屬性
 
@@ -73,14 +73,14 @@
 
 韻與開合的關係如下：
 
-- 開合皆有的韻：支脂微齊祭泰佳皆夬廢眞元寒刪山仙先歌麻陽唐庚耕清青蒸登
-- 必爲開口的韻：咍痕欣嚴之魚臻蕭宵肴豪侯侵覃談鹽添咸銜
+- 開合兼備的韻：支脂微齊祭泰佳皆夬廢真元寒刪山仙先歌麻陽唐庚耕清青蒸登
+- 必爲開口的韻：咍痕殷嚴之魚臻蕭宵肴豪侯侵覃談鹽添咸銜
 - 必爲合口的韻：灰魂文凡
 - 開合中立的韻：東冬鍾江虞模尤幽
 
 .. hint::
 
-    不要與韻圖的開合混淆。
+    不要與韻鏡的開合混淆。
 
     以《韻鏡》爲例，開合有三種取值：開、合、開合。
 
@@ -96,7 +96,7 @@
 
 - 一等韻：冬模泰咍灰痕魂寒豪唐登侯覃談
 - 二等韻：江佳皆夬刪山肴耕咸銜
-- 三等韻：鍾支脂之微魚虞祭廢眞臻欣元文仙宵陽清蒸尤幽侵鹽嚴凡
+- 三等韻：鍾支脂之微魚虞祭廢真臻殷元文仙宵陽清蒸尤幽侵鹽嚴凡
 - 四等韻：齊先蕭青添
 - 一三等韻：東歌
 - 二三等韻：麻庚
@@ -105,9 +105,9 @@
 
 .. hint::
 
-    不要與韻圖的等混淆。
+    不要與韻鏡的等混淆。
 
-    - 韻圖將重紐 A 類字置於四等，實際爲三等
+    - 韻鏡將重紐 A 類字置於四等，實際爲三等
     - 三等韻的莊組字列在二等
     - 三等韻的精組字列在四等
     - 三等的幽韻列在四等
@@ -117,11 +117,9 @@
 取值：`None`、重紐A類、重紐B類。
 
 - 重紐母：幫滂並明見溪羣疑影曉
-- 重紐韻：支脂祭眞仙宵清侵鹽
+- 重紐韻：支脂祭真仙宵清侵鹽
 
 當聲紐不爲重紐母，或韻不爲重紐韻時，重紐必須爲 `None`。
-
-清韻重紐母取重紐A類。
 
 ### 韻、攝
 
@@ -130,10 +128,10 @@
 - 止攝：支脂之微
 - 遇攝：魚虞模
 - 蟹攝：齊佳皆灰咍祭泰夬廢
-- 臻攝：眞諄臻文欣元魂痕
-- 山攝：寒桓刪山先仙
+- 臻攝：真臻文殷魂痕
+- 山攝：元寒刪山先仙
 - 效攝：蕭宵肴豪
-- 果攝：歌戈
+- 果攝：歌
 - 假攝：麻
 - 宕攝：唐陽
 - 梗攝：庚耕清青
@@ -144,9 +142,9 @@
 
 .. hint::
 
-    元韻在臻攝而非山攝（註：下一版會改爲山攝）。
+    不使用諄桓戈韻，分別併入真寒歌韻。
 
-    《廣韻》沒有諄桓戈韻，分別併入眞寒歌韻。殷韻爲欣韻（註：下一版會改爲殷韻）。
+    使用殷韻的名稱，不使用欣韻；使用真韻的寫法，不使用眞韻。但構造函式及 `from描述` 方法具備容錯功能，會執行自動轉換。
 
 ### 聲
 
@@ -159,12 +157,17 @@ import re
 from typing import Optional
 
 from .常量 import 常量
-from ._拓展音韻屬性 import 母到清濁, 母到音, 母到組, 韻到攝
+from ._母對應的標準等 import 母對應的標準等
+from .工具.母到清濁 import 母到清濁
+from .工具.母到組 import 母到組
+from .工具.母到音 import 母到音
+from .工具.母與等到類 import 母與等到類
+from .工具.韻到攝 import 韻到攝
 
 編碼表 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-韻順序表 = '東_冬鍾江支脂之微魚虞模齊祭泰佳皆夬灰咍廢眞臻文欣元魂痕寒刪山仙先蕭宵肴豪歌_麻_陽唐庚_耕清青蒸登尤侯幽侵覃談鹽添咸銜嚴凡'
+韻順序表 = '東_冬鍾江支脂之微魚虞模齊祭泰佳皆夬灰咍廢真臻文殷元魂痕寒刪山仙先蕭宵肴豪歌_麻_陽唐庚_耕清青蒸登尤侯幽侵覃談鹽添咸銜嚴凡'
 
-解析音韻描述 = re.compile('([%s])([%s]?)([%s]?)([%s]?)([%s])([%s])' % (
+解析音韻描述 = re.compile('([%s])([%s])?([%s])?([%s])?([%s])([%s])' % (
     常量.所有母, 常量.所有呼, 常量.所有等, 常量.所有重紐, 常量.所有韻, 常量.所有聲))
 
 
@@ -173,7 +176,9 @@ class 音韻地位:
     切韻音系音韻地位。
     '''
 
-    def __init__(self, 母, 呼, 等, 重紐, 韻, 聲):
+    def __init__(self, 母, 呼, 等, 重紐, 韻, 聲) -> None:
+        韻 = 韻.replace('欣', '殷').replace('眞', '真')  # 容錯
+
         音韻地位.驗證(母, 呼, 等, 重紐, 韻, 聲)
 
         self.母 = 母
@@ -189,13 +194,13 @@ class 音韻地位:
         清濁（全清、次清、全濁、次濁）。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').清濁
+        >>> 音韻地位.from描述('幫三凡入').清濁
         '全清'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').清濁
+        >>> 音韻地位.from描述('羣開三A支平').清濁
         '全濁'
         ```
         '''
-        return 母到清濁[self.母]
+        return 母到清濁(self.母)
 
     @property
     def 音(self) -> str:
@@ -203,13 +208,13 @@ class 音韻地位:
         音（脣音、舌音、齒音、牙音、喉音）。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').音
+        >>> 音韻地位.from描述('幫三凡入').音
         '脣'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').音
+        >>> 音韻地位.from描述('羣開三A支平').音
         '牙'
         ```
         '''
-        return 母到音[self.母]
+        return 母到音(self.母)
 
     @property
     def 組(self) -> Optional[str]:
@@ -217,13 +222,13 @@ class 音韻地位:
         組。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').組
+        >>> 音韻地位.from描述('幫三凡入').組
         '幫'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').組
+        >>> 音韻地位.from描述('羣開三A支平').組
         '見'
         ```
         '''
-        return 母到組[self.母]
+        return 母到組(self.母)
 
     @property
     def 攝(self) -> str:
@@ -231,13 +236,22 @@ class 音韻地位:
         攝。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').攝
+        >>> 音韻地位.from描述('幫三凡入').攝
         '咸'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').攝
+        >>> 音韻地位.from描述('羣開三A支平').攝
         '止'
         ```
         '''
-        return 韻到攝[self.韻]
+        return 韻到攝(self.韻)
+
+    @property
+    def 類(self) -> str:
+        '''
+        五十一聲類。
+
+        注意五十一聲類中俟母獨立，故實為五十二個。
+        '''
+        return 母與等到類(self.母, self.等)
 
     @property
     def 描述(self) -> str:
@@ -245,9 +259,9 @@ class 音韻地位:
         音韻描述。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').描述
+        >>> 音韻地位.from描述('幫三凡入').描述
         '幫三凡入'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').描述
+        >>> 音韻地位.from描述('羣開三A支平').描述
         '羣開三A支平'
         ```
         '''
@@ -266,9 +280,9 @@ class 音韻地位:
         最簡音韻描述。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').最簡描述
+        >>> 音韻地位.from描述('幫三凡入').最簡描述
         '幫凡入'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').最簡描述
+        >>> 音韻地位.from描述('羣開三A支平').最簡描述
         '羣開A支平'
         ```
         '''
@@ -279,7 +293,7 @@ class 音韻地位:
         韻 = self.韻
         聲 = self.聲
 
-        if 韻 not in 常量.開合皆有的韻:
+        if 韻 not in 常量.開合兼備的韻:
             呼 = None
         if 韻 not in 常量.一三等韻 and 韻 not in 常量.二三等韻:
             等 = None
@@ -292,9 +306,9 @@ class 音韻地位:
         音韻表達式。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').表達式
+        >>> 音韻地位.from描述('幫三凡入').表達式
         '幫母 三等 凡韻 入聲'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').表達式
+        >>> 音韻地位.from描述('羣開三A支平').表達式
         '羣母 開口 三等 重紐A類 支韻 平聲'
         ```
         '''
@@ -316,9 +330,9 @@ class 音韻地位:
         最簡音韻表達式。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').最簡表達式
+        >>> 音韻地位.from描述('幫三凡入').最簡表達式
         '幫母 凡韻 入聲'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').最簡表達式
+        >>> 音韻地位.from描述('羣開三A支平').最簡表達式
         '羣母 開口 重紐A類 支韻 平聲'
         ```
         '''
@@ -329,7 +343,7 @@ class 音韻地位:
         韻 = self.韻
         聲 = self.聲
 
-        if 韻 not in 常量.開合皆有的韻:
+        if 韻 not in 常量.開合兼備的韻:
             呼 = None
         if 韻 not in 常量.一三等韻 and 韻 not in 常量.二三等韻:
             等 = None
@@ -347,9 +361,9 @@ class 音韻地位:
         音韻編碼。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').編碼
+        >>> 音韻地位.from描述('幫三凡入').編碼
         'A9D'
-        >>> Qieyun.音韻地位.from描述('羣開三A支平').編碼
+        >>> 音韻地位.from描述('羣開三A支平').編碼
         'fFA'
         ```
         '''
@@ -378,11 +392,11 @@ class 音韻地位:
         判斷音韻地位是否符合給定的音韻表達式。
 
         ```python
-        >>> Qieyun.音韻地位.from描述('幫三凡入').屬於('章母')
+        >>> 音韻地位.from描述('幫三凡入').屬於('章母')
         False
-        >>> Qieyun.音韻地位.from描述('幫三凡入').屬於('一四等')
+        >>> 音韻地位.from描述('幫三凡入').屬於('一四等')
         False
-        >>> Qieyun.音韻地位.from描述('幫三凡入').屬於('幫組 或 陽韻')
+        >>> 音韻地位.from描述('幫三凡入').屬於('幫組 或 陽韻')
         True
         ```
         '''
@@ -468,11 +482,6 @@ class 音韻地位:
 
         return any(all(inner(q) for q in p.split(' ')) for p in 表達式.split(' 或 '))
 
-    def __eq__(self, that):
-        if not isinstance(that, 音韻地位):
-            return False
-        return self.描述 == that.描述
-
     @staticmethod
     def 驗證(母: str, 呼: Optional[str], 等: str, 重紐: Optional[str], 韻: str, 聲: str):
         '''
@@ -508,9 +517,9 @@ class 音韻地位:
         elif 韻 in 常量.四等韻:
             assert 等 == '四', 'Unexpected 等: ' + repr(等)
         elif 韻 in 常量.一三等韻:
-            assert 等 in ('一', '三'), 'Unexpected 等: ' + repr(等)
+            assert 等 in '一三', 'Unexpected 等: ' + repr(等)
         elif 韻 in 常量.二三等韻:
-            assert 等 in ('二', '三'), 'Unexpected 等: ' + repr(等)
+            assert 等 in '二三', 'Unexpected 等: ' + repr(等)
 
     @staticmethod
     def from編碼(編碼: str):
@@ -586,15 +595,12 @@ class 音韻地位:
         '''
         # TODO: 重寫解析器，支援更多格式
 
-        match = 解析音韻描述.fullmatch(描述)
-        assert match is not None
+        描述 = 描述.replace('欣', '殷').replace('眞', '真')  # 容錯
 
-        母 = match.group(1)
-        呼 = match.group(2) or None
-        等 = match.group(3) or None
-        重紐 = match.group(4) or None
-        韻 = match.group(5)
-        聲 = match.group(6)
+        match = 解析音韻描述.fullmatch(描述)
+        assert match is not None, 'Invalid 描述: ' + repr(描述)
+
+        母, 呼, 等, 重紐, 韻, 聲 = match.groups()
 
         if 呼 is None and 母 not in '幫滂並明':
             if 韻 in 常量.必爲開口的韻:
@@ -616,5 +622,67 @@ class 音韻地位:
 
         return 音韻地位(母, 呼, 等, 重紐, 韻, 聲)
 
-    def __repr__(self):
+    def is_normal(self):
+        '''
+        是 normal 的音韻地位。
+
+        例如，端母二等不是 normal 的音韻地位。
+        '''
+        return self.等 in 母對應的標準等[self.母]
+
+    def __repr__(self) -> str:
         return '<音韻地位 ' + self.描述 + '>'
+
+    def __eq__(self, that) -> bool:
+        if not isinstance(that, 音韻地位):
+            return False
+        return self.最簡描述 == that.最簡描述
+
+    def __lt__(self, that) -> bool:
+        if not isinstance(that, 音韻地位):
+            raise TypeError(
+                "'<' not supported between instances of '音韻地位' and " + type(that).__name__)
+
+        def 母到編碼(母):
+            return 常量.所有母.index(母)
+
+        def 呼到編碼(呼):
+            return [None, '開', '合'].index(呼)
+
+        def 等到編碼(等):
+            return '一二三四'.index(等)
+
+        def 重紐到編碼(重紐):
+            return [None, 'A', 'B'].index(重紐)
+
+        def 韻到編碼(韻):
+            return 常量.所有韻.index(韻)
+
+        def 聲到編碼(聲):
+            return 常量.所有聲.index(聲)
+
+        return (
+            聲到編碼(self.聲),
+            韻到編碼(self.韻),
+            重紐到編碼(self.重紐),
+            等到編碼(self.等),
+            呼到編碼(self.呼),
+            母到編碼(self.母),
+        ) < (
+            聲到編碼(that.聲),
+            韻到編碼(that.韻),
+            重紐到編碼(that.重紐),
+            等到編碼(that.等),
+            呼到編碼(that.呼),
+            母到編碼(that.母),
+        )
+
+    def __le__(self, that) -> bool:
+        if not isinstance(that, 音韻地位):
+            raise TypeError(
+                "'<' not supported between instances of '音韻地位' and " + type(that).__name__)
+
+        return self == that or self < that
+
+    def __hash__(self) -> int:
+        return hash(self.最簡描述)
